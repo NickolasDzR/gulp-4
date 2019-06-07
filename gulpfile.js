@@ -9,7 +9,8 @@ var gulp = require('gulp'), // Подключаем Gulp
   imagemin = require('gulp-imagemin'),
   pngquant = require('imagemin-pngquant'),
   cashe = require('gulp-cache'),
-  autoprefixer = require('gulp-autoprefixer');
+  autoprefixer = require('gulp-autoprefixer')
+pug = require('gulp-pug');
 /* task for sass from sass folder */
 
 gulp.task('sass', function () {
@@ -19,6 +20,8 @@ gulp.task('sass', function () {
     .pipe(gulp.dest('app/css'))
     .pipe(browserSync.reload({ stream: true }));
 });
+
+
 
 gulp.task('browser-sync', function () {
   browserSync.init({
@@ -57,13 +60,10 @@ gulp.task('clean', async function () {
   return del.sync('dist');
 });
 
-gulp.task('clear', async function () {
-  return cache.clearAll();
-});
 
 gulp.task('images', function () {
   return gulp.src('app/img/**/*')
-    .pipe(cache(imagemin([
+    .pipe(imagemin([
       imagemin.gifsicle({ interlaced: true }),
       imagemin.jpegtran({ progressive: true }),
       imagemin.optipng({ optimizationLevel: 5 }),
@@ -73,7 +73,7 @@ gulp.task('images', function () {
           { cleanupIDs: false }
         ]
       })
-    ])))
+    ]))
     .pipe(gulp.dest('dist/img'));
 });
 
@@ -94,12 +94,20 @@ gulp.task('build', async function () {
     .pipe(gulp.dest('dist/html'))
 });
 
+gulp.task('pug', function buildHTML() {
+  return gulp.src('pug/pages/*.pug')
+    .pipe(pug({
+      pretty: true
+    }))
+    .pipe(gulp.dest('dist/html/*.html'))
+    .pipe(browserSync.reload())
+});
+
 gulp.task('watch', gulp.parallel('browser-sync', 'sass', 'scripts', 'css-libs', function () {
   gulp.watch('app/sass/**/*.sass', gulp.parallel('sass'));
   gulp.watch('app/**/*.html').on('change', browserSync.reload);
   gulp.watch('app/js/*.js').on('change', browserSync.reload);
 }));
 
-gulp.task('default', gulp.parallel('css-libs', 'sass', 'scripts', 'browser-sync', 'watch'));
+gulp.task('default', gulp.parallel('css-libs', 'sass', 'scripts', 'pug', 'browser-sync', 'watch'));
 gulp.task('build', gulp.parallel('build', 'clean', 'images', 'sass', 'scripts'));
-
