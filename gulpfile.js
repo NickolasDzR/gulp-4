@@ -26,7 +26,7 @@ gulp.task('sass', function () {
 gulp.task('browser-sync', function () {
   browserSync.init({
     server: {
-      baseDir: "app"
+      baseDir: "dist/html"
     },
     notify: false
   });
@@ -35,9 +35,9 @@ gulp.task('browser-sync', function () {
 
 gulp.task('scripts', function () {
   return gulp.src([
-    'app/libs/jquery/dist/jquery.min.js',
-    'app/libs/magnific-popup/dist/jquery.magnific-popup.min.js']
-  )
+    //'app/libs/jquery/dist/jquery.min.js',
+    //'app/libs/magnific-popup/dist/jquery.magnific-popup.min.js']
+  ])
     .pipe(concat('libs.min.js'))
     .pipe(uglify())
     .pipe(gulp.dest('app/js'));
@@ -99,15 +99,15 @@ gulp.task('pug', function buildHTML() {
     .pipe(pug({
       pretty: true
     }))
-    .pipe(gulp.dest('dist/html/*.html'))
-    .pipe(browserSync.reload())
+    .pipe(gulp.dest('dist/html/'))
+    .pipe(browserSync.reload({ stream: true }));
 });
 
-gulp.task('watch', gulp.parallel('browser-sync', 'sass', 'scripts', 'css-libs', function () {
+gulp.task('watch', gulp.parallel('browser-sync', 'sass', 'css-libs', 'pug', function () {
   gulp.watch('app/sass/**/*.sass', gulp.parallel('sass'));
-  gulp.watch('app/**/*.html').on('change', browserSync.reload);
+  gulp.watch('pug/**/*.pug').on('change', gulp.parallel('pug'));
   gulp.watch('app/js/*.js').on('change', browserSync.reload);
 }));
 
-gulp.task('default', gulp.parallel('css-libs', 'sass', 'scripts', 'pug', 'browser-sync', 'watch'));
-gulp.task('build', gulp.parallel('build', 'clean', 'images', 'sass', 'scripts'));
+gulp.task('default', gulp.parallel('css-libs', 'sass', 'pug', 'browser-sync', 'watch'));
+gulp.task('build', gulp.parallel('build', 'clean', 'images', 'sass'));
